@@ -1,4 +1,5 @@
-import { Directive, input } from "@angular/core";
+import { Directive, ElementRef, inject, input } from "@angular/core";
+import { LogDirective } from "./log.directive";
 
 
 
@@ -6,12 +7,14 @@ import { Directive, input } from "@angular/core";
     selector: 'a[appSafeLink]',
     standalone: true,
     host: {
-        '(click)': 'onConfirmLeavePage($event)'
-    }
+        '(click )': 'onConfirmLeavePage($event)'
+    },
+    hostDirectives: [LogDirective]
 })
 export class SafeLinkDirective {
 
     queryParam = input('myapp', { alias: 'appSafeLink' });
+    private hostElementRef = inject<ElementRef<HTMLAnchorElement>>(ElementRef);
 
 
     constructor() {
@@ -22,8 +25,8 @@ export class SafeLinkDirective {
         const wantsToLeave = window.confirm('Do you want to leave the app?');
 
         if (wantsToLeave) {
-            const address = (event.target as HTMLAnchorElement).href;
-            (event.target as HTMLAnchorElement).href = address + '?from=' + this.queryParam();
+            const address = this.hostElementRef.nativeElement.href;
+            this.hostElementRef.nativeElement.href = address + '?from=' + this.queryParam();
             return;
         }
 
